@@ -1,15 +1,15 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-        <title>Ë®ÎÂ»ìºÏ±ÈÀı¼ÆËã</title>
+        <title>æ°´æ¸©æ··åˆæ¯”ä¾‹è®¡ç®—</title>
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.0/dist/jquery.min.js"></script>
-        <!-- ×îĞÂ°æ±¾µÄ Bootstrap ºËĞÄ CSS ÎÄ¼ş -->
+        <!-- æœ€æ–°ç‰ˆæœ¬çš„ Bootstrap æ ¸å¿ƒ CSS æ–‡ä»¶ -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
 
-        <!-- ¿ÉÑ¡µÄ Bootstrap Ö÷ÌâÎÄ¼ş£¨Ò»°ã²»ÓÃÒıÈë£© -->
+        <!-- å¯é€‰çš„ Bootstrap ä¸»é¢˜æ–‡ä»¶ï¼ˆä¸€èˆ¬ä¸ç”¨å¼•å…¥ï¼‰ -->
         <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous"> -->
 
-        <!-- ×îĞÂµÄ Bootstrap ºËĞÄ JavaScript ÎÄ¼ş -->
+        <!-- æœ€æ–°çš„ Bootstrap æ ¸å¿ƒ JavaScript æ–‡ä»¶ -->
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
         <script>
             $().ready(function(){
@@ -24,9 +24,9 @@
                         var targetTemp = parseFloat(targetTempStr);
                         var proportion1=(targetTemp-temp2)/(temp1-temp2);
                         var proportion2=1-proportion1;
-                        var result = "Ë®ÎÂ»ìºÏ±ÈÀı£º\n"+
-                            "Ë®ÎÂ1£º"+temp1Str+"\t±ÈÀı£º"+round(proportion1)+"\n"+
-                            "Ë®ÎÂ2£º"+temp2Str+"\t±ÈÀı£º"+round(proportion2);
+                        var result = "æ°´æ¸©æ··åˆæ¯”ä¾‹ï¼š\n"+
+                            "æ°´æ¸©1ï¼š"+temp1Str+"\tæ¯”ä¾‹ï¼š"+round(proportion1)+"\n"+
+                            "æ°´æ¸©2ï¼š"+temp2Str+"\tæ¯”ä¾‹ï¼š"+round(proportion2);
                         $("#result").text("").children().remove();
                         $("#result").append(result.replace(/\n/g,"</p><p>"));
                     }
@@ -41,11 +41,11 @@
         </script>
     </head>
     <body>
-        <label for="temp1">Ë®ÎÂ1</label>
+        <label for="temp1">æ°´æ¸©1</label>
         <input type="text" class="form-control" name="temp1" id="temp1">
-        <label for="temp2">Ë®ÎÂ2</label>
+        <label for="temp2">æ°´æ¸©2</label>
         <input type="text" class="form-control" name="temp2" id="temp2">
-        <label for="targetTemp">Ä¿±êË®ÎÂ</label>
+        <label for="targetTemp">ç›®æ ‡æ°´æ¸©</label>
         <input type="text" class="form-control" name="targetTemp" id="targetTemp">
         <p id="result"></p>
     </body>
