@@ -1,0 +1,52 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <title>水温混合比例计算</title>
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.0/dist/jquery.min.js"></script>
+        <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+
+        <!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
+        <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous"> -->
+
+        <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+        <script>
+            $().ready(function(){
+                $("input").on("keyup",function(){
+                    var temp1Str = $("#temp1").val();
+                    var temp2Str = $("#temp2").val();
+                    var targetTempStr = $("#targetTemp").val();
+                    if(notBlank(temp1Str) && notBlank(temp2Str) 
+                        && notBlank(targetTempStr)){
+                        var temp1 = parseFloat(temp1Str);
+                        var temp2 = parseFloat(temp2Str);
+                        var targetTemp = parseFloat(targetTempStr);
+                        var proportion1=(targetTemp-temp2)/(temp1-temp2);
+                        var proportion2=1-proportion1;
+                        var result = "水温混合比例：\n"+
+                            "水温1："+temp1Str+"\t比例："+round(proportion1)+"\n"+
+                            "水温2："+temp2Str+"\t比例："+round(proportion2);
+                        $("#result").text("").children().remove();
+                        $("#result").append(result.replace(/\n/g,"</p><p>"));
+                    }
+                });
+            });
+            function notBlank(str) {
+                return str!=null && str.trim()!='';
+            }
+            function round(number, precision=2) {
+                return Math.round(+number + 'e' + precision) / Math.pow(10, precision);
+            }
+        </script>
+    </head>
+    <body>
+        <label for="temp1">水温1</label>
+        <input type="text" class="form-control" name="temp1" id="temp1">
+        <label for="temp2">水温2</label>
+        <input type="text" class="form-control" name="temp2" id="temp2">
+        <label for="targetTemp">目标水温</label>
+        <input type="text" class="form-control" name="targetTemp" id="targetTemp">
+        <p id="result"></p>
+    </body>
+</html>
