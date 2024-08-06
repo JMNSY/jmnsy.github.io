@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>份量计算器</title>
+<script src="https://cdn.jsdelivr.net/npm/chinese-days/dist/index.min.js"></script>
+<script>
+function calculatePortions() {
+    const totalWeight = parseFloat(document.getElementById('totalWeight').value);
+    const bigPortionWeight = parseFloat(document.getElementById('bigPortionWeight').value);
+    const smallPortionWeight = parseFloat(document.getElementById('smallPortionWeight').value);
+    const startDate = document.getElementById('startDate').value;
+    if (isNaN(totalWeight) || isNaN(bigPortionWeight) || isNaN(smallPortionWeight) || !startDate) {
+        alert('请输入有效的数值和日期！');
+        return;
+    }
+
+    let bigPortions = 0;
+    let smallPortions = 0;
+    let remainingWeight = totalWeight;
+
+    const processDate = async (date) => {
+        if (remainingWeight <= smallPortionWeight) {
+					document.getElementById('bigPortions').innerText = bigPortions;
+					document.getElementById('smallPortions').innerText = smallPortions;
+					// 如果有剩余，平均分配到每个小份中
+					if (remainingWeight > 0) {
+							alert(`有剩余 ${remainingWeight} 克，将平均分配到每个小份中。`);
+							return;
+					}
+					
+				}
+				
+        let isHol = !chineseDays.isWorkday(date);
+        const portionWeight = isHol ? bigPortionWeight : smallPortionWeight;
+
+        if (remainingWeight >= portionWeight) {
+            isHol ? bigPortions++ : smallPortions++;
+            remainingWeight -= portionWeight;
+        }
+
+        // 计算下一个日期
+        const nextDate = new Date(date);
+        nextDate.setDate(nextDate.getDate() + 2);
+        processDate(nextDate.toISOString().split('T')[0]);
+    };
+
+    processDate(startDate);
+}
+
+// 为每个元素绑定 'keydown' 事件
+document.querySelectorAll('.input-form').forEach(function(inputElement) {
+    inputElement.addEventListener('keydown', function(event) {
+        // 当按下 Enter 键时执行计算
+        if (event.key === 'Enter') {
+            calculatePortions();
+        }
+    });
+});
+</script>
+</head>
+<body>
+
+<h2>份量计算器</h2>
+
+<div>
+    <label for="totalWeight">总克重:</label>
+    <input type="number" id="totalWeight" class="input-form" step="0.01">
+</div>
+
+<div>
+    <label for="bigPortionWeight">大份克重:</label>
+    <input type="number" id="bigPortionWeight" class="input-form" step="0.01">
+</div>
+
+<div>
+    <label for="smallPortionWeight">小份克重:</label>
+    <input type="number" id="smallPortionWeight" class="input-form" step="0.01">
+</div>
+
+<div>
+    <label for="startDate">起始日期 (YYYY-MM-DD):</label>
+    <input type="date" id="startDate" class="input-form">
+</div>
+
+<button onclick="calculatePortions()">计算</button>
+
+<h3>结果：</h3>
+<div>大份克重份数: <span id="bigPortions">0</span></div>
+<div>小份克重份数: <span id="smallPortions">0</span></div>
+
+</body>
+</html>
