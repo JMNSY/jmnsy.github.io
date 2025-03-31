@@ -2,9 +2,6 @@
 <html lang="zh-CN">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>音频循环播放器</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -120,28 +117,81 @@
         display: none;
       }
     }
+    /* 新增分组样式 */
+    .work-group {
+      margin: 15px 0;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .group-header {
+      padding: 12px 15px;
+      background-color: #f8f9fa;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .group-title {
+      flex: 1;
+      font-weight: 500;
+      margin-left: 8px;
+    }
+
+    .group-toggle {
+      transition: transform 0.3s ease;
+    }
+
+    .group-content {
+      display: none;
+    }
+
+    .group-content.active {
+      display: table-row-group;
+    }
+
+    .work-jump-links {
+      margin: 15px 0;
+      padding: 10px;
+      background: white;
+      border-radius: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .work-jump-link {
+      color: #007AFF;
+      text-decoration: none;
+      padding: 5px 10px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .work-jump-link:hover {
+      background: rgba(0, 122, 255, 0.1);
+    }
+
+    .rotate-90 {
+      transform: rotate(90deg);
+    }
   </style>
 </head>
 
 <body>
   <div class="container">
+    <div class="status-info">选择文件自动尝试匹配循环配置，匹配不正确可手动选择，停止播放请在网页中操作</div>
     <input type="file" id="fileInput" accept="audio/*">
+    <div class="work-jump-links" id="workLinks"></div>
     <div class="status-info" id="status"></div>
     <button id="globalStopBtn" class="stop-btn" style="display: none;">停止播放</button>
-    <table class="config-table">
-      <thead>
-        <tr>
-          <th class="radio-cell"></th>
-          <th>文件名</th>
-          <th>作品名</th>
-          <th>专辑名</th>
-          <th>目录编号</th>
-        </tr>
-      </thead>
-      <tbody id="configList">
-        <!-- 动态生成配置列表 -->
-      </tbody>
-    </table>
+    
+    <div id="configGroups">
+      <!-- 动态生成分组内容 -->
+    </div>
   </div>
 
   <script>
@@ -175,53 +225,179 @@
         console.error('初始化失败:', error);
         alert(`无法加载配置文件: ${error.message}`);
       }
+    // 在初始化函数末尾添加hash监听
+    window.addEventListener('load', function() {
+        // 初始加载时检查hash
+        if (window.location.hash) {
+            const targetId = window.location.hash.substring(1);
+            toggleAllGroups(targetId);
+            scrollToGroup(targetId);
+        }
+    });
+    }
+
+    // 新增分组操作函数
+    function toggleAllGroups(targetId) {
+        // 关闭所有分组
+        document.querySelectorAll('.work-group').forEach(group => {
+            const content = group.querySelector('.group-content');
+            const toggle = group.querySelector('.group-toggle');
+            if (group.id !== targetId) {
+                content.classList.remove('active');
+                toggle.classList.remove('rotate-90');
+            } else {
+                content.classList.add('active');
+                toggle.classList.add('rotate-90');
+            }
+        });
+    }
+
+    // 新增滚动函数
+    function scrollToGroup(targetId) {
+        const targetGroup = document.getElementById(targetId);
+        if (targetGroup) {
+            // 平滑滚动到目标位置
+            targetGroup.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+            // 更新URL hash
+            history.pushState(null, null, `#${targetId}`);
+        }
     }
 
     // 初始化配置列表
     function initConfigList() {
-      const tbody = document.getElementById('configList');
+      const container = document.getElementById('configGroups');
+      const workLinks = document.getElementById('workLinks');
+      container.innerHTML = '';
+      workLinks.innerHTML = '';
 
-      tbody.innerHTML = ''; // 清空现有内容
-      jsonData.forEach((item, index) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td class="radio-cell">
-                <input type="radio" name="config" value="${index}">
-                <button class="row-stop-btn" data-index="${index}" style="display: none;"></button>
-            </td>
-            <td>${item.fileName}</td>
-            <td>${item.workName || 'N/A'}</td>
-            <td>${item.albumName || 'N/A'}</td>
-            <td>${item.catalogNumber || 'N/A'}</td>
+      // 按作品名分组
+      const groupedData = jsonData.reduce((groups, item) => {
+        const key = item.workName || '未分类';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(item);
+        return groups;
+      }, {});
+
+      // 生成跳转链接
+      Object.keys(groupedData).forEach(workName => {
+        const link = document.createElement('a');
+        link.className = 'work-jump-link';
+        link.textContent = workName;
+        link.href = `#${encodeURIComponent(workName)}`;
+        // 添加点击事件处理
+        link.addEventListener('click', function(e) {
+            e.preventDefault(); // 阻止默认跳转行为
+            const targetId = this.getAttribute('href').substring(1);
+            toggleAllGroups(targetId);
+            scrollToGroup(targetId);
+        });
+        workLinks.appendChild(link);
+      });
+
+      // 生成分组内容
+      Object.entries(groupedData).forEach(([workName, items]) => {
+        const group = document.createElement('div');
+        group.className = 'work-group';
+        group.id = encodeURIComponent(workName);
+        
+        // 分组标题
+        const header = document.createElement('div');
+        header.className = 'group-header';
+        header.innerHTML = `
+          <svg class="group-toggle" width="12" height="12" viewBox="0 0 24 24">
+            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+          </svg>
+          <span class="group-title">${workName}</span>
         `;
 
-        // 单选按钮事件
-        const radio = tr.querySelector('input');
-        radio.addEventListener('change', function () {
+        // 分组内容表格
+        const table = document.createElement('table');
+        table.className = 'config-table';
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th class="radio-cell"></th>
+              <th>文件名</th>
+              <th>专辑名</th>
+              <th>目录编号</th>
+            </tr>
+          </thead>
+          <tbody class="group-content">
+            ${items.map((item, index) => `
+              <tr>
+                <td class="radio-cell">
+                  <input type="radio" name="config" value="${jsonData.indexOf(item)}">
+                  <button class="row-stop-btn" data-index="${jsonData.indexOf(item)}" style="display: none;"></button>
+                </td>
+                <td>${item.fileName}</td>
+                <td>${item.albumName || 'N/A'}</td>
+                <td>${item.catalogNumber || 'N/A'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        `;
+
+        // 折叠切换逻辑
+        header.addEventListener('click', () => {
+          const content = table.querySelector('tbody');
+          content.classList.toggle('active');
+          header.querySelector('.group-toggle').classList.toggle('rotate-90');
+        });
+
+        // 初始状态展开第一个分组
+        if (Object.keys(groupedData)[0] === workName) {
+          table.querySelector('tbody').classList.add('active');
+          header.querySelector('.group-toggle').classList.add('rotate-90');
+        }
+
+        group.appendChild(header);
+        group.appendChild(table);
+        container.appendChild(group);
+      });
+
+      // 重新绑定事件
+      bindRadioEvents();
+    }
+
+    // 新增事件绑定函数
+    function bindRadioEvents() {
+      document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+          const index = parseInt(this.value);
           if (this.checked && audioBuffer) {
-            currentSelection = index;
-            if (source) source.stop(0);
-
-            source = context.createBufferSource();
-            source.buffer = audioBuffer;
-            source.loop = true;
-            source.loopStart = item.start;
-            source.loopEnd = item.end;
-            source.connect(context.destination);
-            source.start(0);
-
-            // 显示停止按钮
-            document.getElementById('globalStopBtn').style.display = 'inline-block';
-            document.querySelectorAll('.row-stop-btn').forEach(btn => btn.style.display = 'none');
-            tr.querySelector('.row-stop-btn').style.display = 'inline-block';
-            updateStatusDisplay();
+            handleRadioChange(index);
           }
         });
-        // 行内停止按钮事件
-        tr.querySelector('.row-stop-btn').addEventListener('click', stopPlayback);
-        tbody.appendChild(tr);
+      });
+
+      document.querySelectorAll('.row-stop-btn').forEach(btn => {
+        btn.addEventListener('click', stopPlayback);
       });
     }
+
+    // 提取原来的处理逻辑为独立函数
+    function handleRadioChange(index) {
+      currentSelection = index;
+      if (source) source.stop(0);
+
+      const item = jsonData[index];
+      source = context.createBufferSource();
+      source.buffer = audioBuffer;
+      source.loop = true;
+      source.loopStart = item.start;
+      source.loopEnd = item.end;
+      source.connect(context.destination);
+      source.start(0);
+
+      document.getElementById('globalStopBtn').style.display = 'inline-block';
+      document.querySelectorAll('.row-stop-btn').forEach(btn => btn.style.display = 'none');
+      document.querySelector(`.row-stop-btn[data-index="${index}"]`).style.display = 'inline-block';
+      updateStatusDisplay();
+    }
+
 
     // 莱文斯坦距离算法
     function levenshteinDistance(a, b) {
@@ -314,6 +490,7 @@
         context = new (window.AudioContext || window.webkitAudioContext)();
       }
     }, { once: true });
+    
   </script>
 </body>
 
